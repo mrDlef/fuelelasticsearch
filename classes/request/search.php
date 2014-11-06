@@ -57,12 +57,22 @@ class Request_Search extends Request_Abstract
 
 	public function filter_terms($filters)
 	{
-		foreach($filters as $term=>$values)
+		foreach ($filters as $term => $values)
 		{
 			$this->_request['body']['query']['filtered']['filter']['and'][] = array(
 				'terms' => array($term => $values),
 			);
 		}
+	}
+
+	public function filter_or($filters)
+	{
+		$or = array();
+		foreach($filters as $filter)
+		{
+			$or['or'][] = $filter;
+		}
+		$this->_request['body']['query']['filtered']['filter']['and'][] = $or;
 	}
 
 }

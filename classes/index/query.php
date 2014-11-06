@@ -72,6 +72,12 @@ class Index_Query
 		return $this;
 	}
 
+	public function filter_or($filters)
+	{
+		$this->_request->filter_or($filters);
+		return $this;
+	}
+
 	public function terms_aggregation($name, $terms)
 	{
 		$this->_request->terms_aggregation($name, $terms);
