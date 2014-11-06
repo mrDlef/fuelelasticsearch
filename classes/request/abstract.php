@@ -44,7 +44,8 @@ abstract class Request_Abstract
 		}
 		catch (\Exception $ex)
 		{
-			\Log::error('Elasticsearch ('.__FILE__.'#'.__LINE__.'): '.$ex->getMessage());
+			$error = \Format::forge($ex->getMessage(), 'json')->to_array();
+			\Log::error('Elasticsearch error '.$error['status'].' in '.__FILE__.'#'.__LINE__.': '.$error['error']);
 		}
 	}
 
