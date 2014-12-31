@@ -27,66 +27,12 @@ class Index_Query
 		return $this;
 	}
 
-	public function search_type($type)
-	{
-		$this->_request->search_type($type);
-		return $this;
-	}
-
-	public function sort($by)
-	{
-		$this->_request->sort($by);
-		return $this;
-	}
-
-	public function limit($limit, $from = 0)
-	{
-		$this->_request->limit($limit, $from);
-		return $this;
-	}
-
-	public function min_score($score)
-	{
-		$this->_request->min_score($score);
-		return $this;
-	}
-
 	public function dynamic_min_score($rate)
 	{
 		$this->_request->return_source(false);
 		$this->_request->limit(1);
 		$max_score = $this->get_max_score();
 		$this->min_score($max_score * $rate);
-		return $this;
-	}
-
-	public function filter_term($field, $value)
-	{
-		$this->_request->filter_term($field, $value);
-		return $this;
-	}
-
-	public function filter_terms($filters)
-	{
-		$this->_request->filter_terms($filters);
-		return $this;
-	}
-
-	public function filter_or($filters)
-	{
-		$this->_request->filter_or($filters);
-		return $this;
-	}
-
-	public function terms_aggregation($name, $terms)
-	{
-		$this->_request->terms_aggregation($name, $terms);
-		return $this;
-	}
-
-	public function return_source($bool)
-	{
-		$this->_request->return_source($bool);
 		return $this;
 	}
 
@@ -233,14 +179,24 @@ class Index_Query
 		return $this->_results['hits']['total'];
 	}
 
-	public function get_ids()
+	public function get_sources()
 	{
-		$this->execute();
-		if(empty($this->_results))
+		$hits = $this->get_hits();
+		if(empty($hits))
 		{
 			return null;
 		}
-		return \Arr::pluck($this->_results['hits']['hits'], '_id');
+		return \Arr::pluck($hits, '_source');
+	}
+
+	public function get_ids()
+	{
+		$hits = $this->get_hits();
+		if(empty($hits))
+		{
+			return null;
+		}
+		return \Arr::pluck($hits, '_id');
 	}
 
 	public function get_aggregation($name)
@@ -250,5 +206,11 @@ class Index_Query
 			return null;
 		}
 		return $this->_results['aggregations'][$name];
+	}
+
+	public function __call($name, $args)
+	{
+		call_user_func_array(array($this->_request, $name), $args);
+		return $this;
 	}
 }

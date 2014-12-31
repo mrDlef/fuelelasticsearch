@@ -19,6 +19,34 @@ class Elasticsearch
 		return $config;
 	}
 
+	protected static function _get_index_class($type)
+	{
+		$class = explode(':', $type);
+		if(count($class) > 1)
+		{
+			$class = '\\'.$class[0].'\\Index_'.ucfirst($class[1]);
+		}
+		else
+		{
+			$class = '\\Index_'.ucfirst($class[0]);
+		}
+		return $class;
+	}
+
+	protected static function _get_model_class($type)
+	{
+		$class = explode(':', $type);
+		if(count($class) > 1)
+		{
+			$class = '\\'.$class[0].'\\Model_'.ucfirst($class[1]);
+		}
+		else
+		{
+			$class = '\\Model\\'.ucfirst($class[0]);
+		}
+		return $class;
+	}
+
 	public static function run()
 	{
 		\Cli::write();
@@ -81,7 +109,7 @@ class Elasticsearch
 
 	public static function exists($type, $id)
 	{
-		$class = '\\Index_'.ucfirst($type);
+		$class = static::_get_index_class($type);
 
 		$result = $class::query()
 			->request('exists', $id)
@@ -99,7 +127,7 @@ class Elasticsearch
 
 	public static function get($type, $id)
 	{
-		$class = '\\Index_'.ucfirst($type);
+		$class = static::_get_index_class($type);
 
 		$document = $class::query()
 			->request('get', $id)
@@ -117,7 +145,7 @@ class Elasticsearch
 
 	public static function delete($type, $id)
 	{
-		$class = '\\Index_'.ucfirst($type);
+		$class = static::_get_index_class($type);
 
 		$result = $class::query()
 			->request('delete', $id)
@@ -133,10 +161,28 @@ class Elasticsearch
 		}
 	}
 
+	public static function delete_all($type)
+	{
+		$class = static::_get_index_class($type);
+
+		$result = $class::delete_by_query()
+			->match_all()
+			->execute();
+
+		if ($result)
+		{
+			\Cli::write(ucfirst($type).' deleted');
+		}
+		else
+		{
+			\Cli::write(ucfirst($type).' doesn\'t exists');
+		}
+	}
+
 	public static function index_all($type)
 	{
-		$model_class = '\\Model\\'.ucfirst($type);
-		$index_class = '\\Index_'.ucfirst($type);
+		$model_class = static::_get_model_class($type);
+		$index_class = static::_get_index_class($type);
 
 		$objects = $model_class::query()->get();
 
