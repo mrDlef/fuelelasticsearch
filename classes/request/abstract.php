@@ -42,6 +42,10 @@ abstract class Request_Abstract
 		{
 			return false;
 		}
+		catch (\Elasticsearch\Common\Exceptions\Curl\CouldNotConnectToHost $ex)
+		{
+			throw $ex;
+		}
 		catch (\Exception $ex)
 		{
 			$error = \Format::forge($ex->getMessage(), 'json')->to_array();
@@ -51,7 +55,7 @@ abstract class Request_Abstract
 			}
 			else
 			{
-				\Log::error('Elasticsearch error in '.__FILE__.'#'.__LINE__.': '.$error['error']);
+				\Log::error('Elasticsearch error in '.__FILE__.'#'.__LINE__.': '.$ex->getMessage());
 			}
 		}
 	}
